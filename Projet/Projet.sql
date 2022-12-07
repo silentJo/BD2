@@ -100,6 +100,7 @@ $$
 DECLARE
     ret VARCHAR(8);
 BEGIN
+    raise notice 'coder cours';
     INSERT INTO projet.cours
     VALUES (ncode, nnom, nbloc, ncredits)
     RETURNING ncode INTO ret;
@@ -116,6 +117,7 @@ $$
 DECLARE
     ret INTEGER;
 BEGIN
+    raise notice 'encoder etudiant';
     INSERT INTO projet.etudiants
     VALUES (DEFAULT, nemail, nprenom, nnom, nmdp)
     RETURNING id INTO ret;
@@ -133,6 +135,7 @@ $$ LANGUAGE plpgsql;
 create or replace procedure projet.inscrire_etudiant(nid_etudiant INTEGER, ncode CHARACTER(8)) AS
 $$
 BEGIN
+    raise notice 'inscrire etudiant';
     INSERT INTO projet.inscriptions_cours
     VALUES (ncode, nid_etudiant);
 END;
@@ -141,6 +144,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION projet.check_cours_existant() RETURNS trigger as
 $$
 BEGIN
+    raise notice 'trigger cours existant';
     IF (not exists(select 1 from projet.cours c where c.code = new.cours))
     THEN
         RAISE EXCEPTION 'Le cours renseigné n existe pas';
@@ -158,6 +162,7 @@ EXECUTE PROCEDURE projet.check_cours_existant();
 CREATE OR REPLACE FUNCTION projet.check_cours_avec_projet() RETURNS trigger as
 $$
 BEGIN
+    raise notice 'trigger cours avec projet';
     IF (EXISTS(select 1 from projet.projets p WHERE (p.cours = new.cours)))
     THEN
         RAISE EXCEPTION 'Le cours contient déjà un projet';
@@ -181,6 +186,7 @@ $$
 DECLARE
     ret INTEGER;
 BEGIN
+    raise notice '';
     INSERT INTO projet.projets
     VALUES (DEFAULT, nid, ncours, nnom, ndate_debut, ndate_fin, DEFAULT)
     RETURNING id INTO ret;
