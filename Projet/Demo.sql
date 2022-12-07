@@ -82,7 +82,8 @@ select * from projet.inscription_groupe(1, 'projSD', 1);
 call projet.retirer_du_groupe(1, 1, 'projSD');
 
 select * from projet.groupes;
-delete from projet.membres_groupe where etudiant = 1 and groupe = 1 and projet = 3;
+select * from projet.membres_groupe where etudiant = 1 and groupe = 1 and projet = 3;
+delete from projet.membres_groupe where etudiant = 1 and groupe = 1 and projet = 3 returning *;
 select * from projet.membres_groupe;
 
 --e. Se rajouter au groupe 2 du projet projSD

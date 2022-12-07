@@ -562,11 +562,14 @@ DECLARE
     id_projet INTEGER :=-1;
 BEGIN
     id_projet := (select p.id from projet.projets p where p.identifiant = nidentifiant);
+    raise notice 'nid_etudiant : %', nid_etudiant;-- = 1
+    raise notice 'nnum_groupe : %', nnum_groupe;-- = 1
+    raise notice 'id projet : %', id_projet;-- = 3
     DELETE
     FROM projet.membres_groupe
-    WHERE etudiant = nid_etudiant -- raise notice 'nid_etudiant : %', nid_etudiant; = 1
-      AND groupe = nnum_groupe -- raise notice 'nnum_groupe : %', nnum_groupe; = 1
-      AND projet = id_projet; -- raise notice 'id projet : %', id_projet; = 3
+    WHERE etudiant = nid_etudiant
+      AND groupe = nnum_groupe
+      AND projet = id_projet;
 END;
 $$ language plpgsql;
 
