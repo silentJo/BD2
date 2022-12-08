@@ -1,6 +1,5 @@
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Scanner;
 
@@ -58,16 +57,16 @@ public class ApplicationCentrale {
             choix = scanner.nextLine();
 
             switch (choix) {
-                case "1" -> app.adminActions.addCourse();
-                case "2" -> app.adminActions.addStudent();
-                case "3" -> app.adminActions.enrollStudentInCourse();
-                case "4" -> app.adminActions.createCourseProject();
-                case "5" -> app.adminActions.createProjectGroups();
-                case "6" -> app.adminActions.seeCourses();
-                case "7" -> app.adminActions.seeAllProjects();
-                case "8" -> app.adminActions.seeProjectGroupsCompositions();
-                case "9" -> app.adminActions.validateGroup();
-                case "10" -> app.adminActions.validateAllProjectGroups();
+                case "1" -> app.adminActions.encoderCours();
+                case "2" -> app.adminActions.encoderEtudiant();
+                case "3" -> app.adminActions.inscrireEtudiant();
+                case "4" -> app.adminActions.creerProjet();
+                case "5" -> app.adminActions.creerGroupes();
+                case "6" -> app.adminActions.visualiserCours();
+                case "7" -> app.adminActions.visualiserProjets();
+                case "8" -> app.adminActions.visualiserCompoProjet();
+                case "9" -> app.adminActions.validerGroupe();
+                case "10" -> app.adminActions.validerGroupes();
                 case "q" -> running = false;
                 default ->
                         System.out.println("Veuillez choisir un chiffre entre 1 et 10!");

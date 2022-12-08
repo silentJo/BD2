@@ -186,7 +186,7 @@ $$
 DECLARE
     ret INTEGER;
 BEGIN
-    raise notice '';
+    raise notice 'creer projet';
     INSERT INTO projet.projets
     VALUES (DEFAULT, nid, ncours, nnom, ndate_debut, ndate_fin, DEFAULT)
     RETURNING id INTO ret;
@@ -213,6 +213,7 @@ DECLARE
     nb_membres_crees  INTEGER := 0;
     id_projet INTEGER := -1;
 BEGIN
+    raise notice 'creer groupes';
     nb_membres_max := (SELECT count(i.etudiant)
                        FROM projet.inscriptions_cours i
                        WHERE cours =
@@ -407,6 +408,7 @@ $$
 DECLARE
     id_projet_recherche INTEGER := 0;
 BEGIN
+    raise notice 'valider groupe';
     id_projet_recherche := (select p.id from projet.projets p where p.identifiant = nidentifiant);
     UPDATE projet.groupes g
     SET est_valide = true
@@ -414,10 +416,11 @@ BEGIN
       AND g.num = nnum_groupe;
 END;
 $$ language plpgsql;
-
+/*
 CREATE OR REPLACE FUNCTION projet.check_groupe_complet() RETURNS trigger as
 $$
 BEGIN
+    raise notice 'trigger groupe complet TODO !!!!';
     IF (false)
     THEN
         RAISE EXCEPTION 'Le groupe n est pas complet';
@@ -431,7 +434,7 @@ CREATE TRIGGER trigger_check_groupe_complet
     on projet.groupes
     FOR EACH ROW
 EXECUTE PROCEDURE projet.check_groupe_complet();
-
+*/
 --============================================================================
 --=                        10) VALIDER GROUPES                               =
 --============================================================================
@@ -445,6 +448,7 @@ DECLARE
     record RECORD;
     id_projet_recherche INTEGER := 0;
 BEGIN
+    raise notice 'valider groupes';
     id_projet_recherche := (select p.id from projet.projets p where p.identifiant = nidentifiant);
     FOR record IN (SELECT * FROM projet.groupes)
         LOOP
@@ -494,6 +498,7 @@ DECLARE
     new_member projet.membres_groupe%rowtype;
     id_projet INTEGER := -1;
 BEGIN
+    raise notice 'inscription groupe';
     id_projet := (select p.id from projet.projets p where p.identifiant = nidentifiant);
     INSERT INTO projet.membres_groupe(etudiant, groupe, projet)
     VALUES (nid_etudiant, nnum_groupe, id_projet)
@@ -507,6 +512,7 @@ $$
 declare
     groupe_to_update projet.groupes%rowtype;
 BEGIN
+    raise notice 'increment membres groupe';
     select * from projet.groupes g where g.num = new.groupe and g.id_projet = new.projet into groupe_to_update;
     if not FOUND then
         RAISE exception 'Le groupe % du projet % ne se trouve pas dans la table', new.groupe, new.projet;
@@ -567,6 +573,7 @@ $$
 DECLARE
     id_projet INTEGER :=-1;
 BEGIN
+    raise notice 'retirer du groupe';
     id_projet := (select p.id from projet.projets p where p.identifiant = nidentifiant);
     raise notice 'nid_etudiant : %', nid_etudiant;-- = 1
     raise notice 'nnum_groupe : %', nnum_groupe;-- = 1
@@ -584,6 +591,7 @@ $$
 DECLARE
     groupe_to_update projet.groupes%rowtype;
 BEGIN
+    raise notice 'decrementer nb membres';
     select *
     from projet.groupes g
     where g.num = OLD.groupe

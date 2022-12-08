@@ -36,8 +36,6 @@ l’application utilisateur est ouverte sur le deuxième.
 Le scénario se déroule dans eclipse ou intelliJ. On ouvrira plusieurs consoles en parallèle.
 Les étapes à effectuer sont les suivantes (les étapes commençant par __ ne devraient pas fonctionner) :
 
-
-
    1. Sur l’application centrale :*/
 --a. Ajouter le cours « SD2 » (code : « BINV2140 », 3 ects, bloc 2)
 select * from projet.encoder_cours('BINV2140', 'SD 2', 2, 3);
@@ -80,12 +78,6 @@ select * from projet.inscription_groupe(1, 'projSD', 1);
 --select * from projet.inscription_groupe(1, 'projSD', 2);
 --d. Se retirer du projet projSD
 call projet.retirer_du_groupe(1, 1, 'projSD');
-
-select * from projet.groupes;
-select * from projet.membres_groupe where etudiant = 1 and groupe = 1 and projet = 3;
-delete from projet.membres_groupe where etudiant = 1 and groupe = 1 and projet = 3 returning *;
-select * from projet.membres_groupe;
-
 --e. Se rajouter au groupe 2 du projet projSD
 select * from projet.inscription_groupe(1, 'projSD', 2);
 --f. __Se retirer du projet projSQL

@@ -53,3 +53,12 @@ select g.est_valide from projet.groupes g where g.num = 1 and g.id_projet =1;
 
 select * from projet.groupes;
 select * from projet.membres_groupe;
+
+select * from projet.cours;
+select * from projet.etudiants;
+select * from projet.inscriptions_cours;
+select * from projet.projets;
+select * from projet.groupes;
+select * from projet.visualiser_cours;
+select * from projet.visualiser_projets;
+select * from projet.visualiser_compo_projet;
