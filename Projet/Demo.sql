@@ -89,9 +89,9 @@ select * from projet.inscription_groupe(1, 'projSD', 2);
 --f. __Se retirer du projet projSQL
 --call projet.retirer_du_groupe(1, 1, 'projSD');
 --g. Visualiser tous les projets des cours auxquels il est inscrit
-select * from projet.visualiser_mes_projets;
+select * from projet.visualiser_mes_projets where "Etudiant" = 1;
 --h. Visualiser tous les projets pour lesquels il n’a pas encore de groupe
-select * from projet.visualiser_mes_projets_sans_groupes;
+select * from projet.visualiser_mes_projets_sans_groupes where "Etudiant" = 1;
 --i. Visualiser toutes les compositions de groupes incomplets du projet projSD
 select * from projet.visualiser_groupes_incomplets where "Identifiant" = 'projSD';
 --3. Retour sur l’application centrale

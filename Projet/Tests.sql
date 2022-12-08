@@ -61,3 +61,7 @@ select * from projet.inscriptions_cours;
 select * from projet.projets;
 select * from projet.groupes;
 select * from projet.membres_groupe;
+
+select * from projet.visualiser_mes_projets_sans_groupes where "Etudiant" = 1;
+
+select * from projet.visualiser_groupes_incomplets where "Identifiant" = 'projSD';

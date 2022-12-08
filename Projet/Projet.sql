@@ -660,12 +660,10 @@ SELECT p.id         AS "Identifiant",
        p.date_debut as "Début",
        p.date_fin   as "Fin",
        ic.etudiant  as "Etudiant"
-FROM projet.projets p,
-     projet.cours c,
-     projet.inscriptions_cours ic
-where p.cours = c.code
-  and c.code = ic.cours
-  and p.nb_groupes = 0;
+FROM projet.projets p
+     left join projet.cours c on p.cours = c.code
+     left join projet.inscriptions_cours ic on c.code = ic.cours
+where p.nb_groupes = 0;
 
 
 --============================================================================

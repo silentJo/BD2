@@ -8,7 +8,7 @@ public class AdminActions {
     private PreparedStatement encoderCoursPreparedStatement, encoderEtudiantPreparedStatement,
             inscrireEtudiantPreparedStatement, creerProjetPreparedStatement, creerGroupesPreparedStatement,
             visualiserCoursPreparedStatement, visualiserProjetsPreparedStatement, visualiserCompoProjetPreparedStatement,
-            validerGroupePreparedStatement, validergroupesPreparedStatement;
+            validerGroupePreparedStatement, validerGroupesPreparedStatement;
 
     public AdminActions(Connection connection) {
         this.connection = connection;
@@ -263,12 +263,12 @@ public class AdminActions {
             try {
 
                 System.out.println("\nIdentifiant cours : ");
-                String idCours = scanner.nextLine();
+                String idProjet = scanner.nextLine();
 
                 System.out.println("\nNuméro de groupe : ");
                 String nbGroupe = scanner.nextLine();
 
-                validerGroupePreparedStatement.setString(1, idCours);
+                validerGroupePreparedStatement.setString(1, idProjet);
                 validerGroupePreparedStatement.setInt(2, Integer.parseInt(nbGroupe));
 
                 System.out.printf("%-10s %-20s", "Output", (validerGroupePreparedStatement.execute())
@@ -286,7 +286,26 @@ public class AdminActions {
     }
 
     public void validerGroupes() {
-        //TODO
+        try {
+            validerGroupesPreparedStatement = connection.prepareStatement("CALL projet.valider_groupes(?)");
+            try {
 
+                System.out.println("\nIdentifiant cours : ");
+                String idProjet = scanner.nextLine();
+
+                validerGroupesPreparedStatement.setString(1, idProjet);
+
+                System.out.printf("%-10s %-20s", "Output", (validerGroupesPreparedStatement.execute())
+                        ? "Groupe validé"
+                        : "Echec de la validation du groupe");
+
+            } catch (SQLException e) {
+                System.out.println("Impossible de valider le groupe : " + e);
+                ApplicationCentrale.getException(e);
+            }
+        } catch (SQLException e) {
+            System.out.println("Impossible de valider le groupe -> prepareStatement KO !");
+            ApplicationCentrale.getException(e);
+        }
     }
 }
