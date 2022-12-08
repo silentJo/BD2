@@ -582,16 +582,13 @@ $$
 DECLARE
     id_projet INTEGER :=-1;
 BEGIN
-    raise notice 'retirer du groupe';
     id_projet := (select p.id from projet.projets p where p.identifiant = nidentifiant);
     raise notice 'nid_etudiant : %', nid_etudiant;-- = 1
     raise notice 'nnum_groupe : %', nnum_groupe;-- = 1
     raise notice 'id projet : %', id_projet;-- = 3
-    DELETE
-    FROM projet.membres_groupe
-    WHERE etudiant = nid_etudiant
-      AND groupe = nnum_groupe
-      AND projet = id_projet;
+    DELETE FROM projet.membres_groupe WHERE etudiant = nid_etudiant AND groupe = nnum_groupe AND projet = id_projet;
+    raise notice 'Le membre % du groupe % du projet % a été retiré', nid_etudiant, nnum_groupe, nidentifiant;
+
 END;
 $$ language plpgsql;
 
@@ -600,12 +597,7 @@ $$
 DECLARE
     groupe_to_update projet.groupes%rowtype;
 BEGIN
-    raise notice 'decrementer nb membres';
-    select *
-    from projet.groupes g
-    where g.num = OLD.groupe
-      and g.id_projet = OLD.projet
-    into groupe_to_update;
+    select * from projet.groupes g where g.num = OLD.groupe and g.id_projet = OLD.projet into groupe_to_update;
     if not FOUND then
         RAISE exception 'Le groupe % du projet % ne se trouve pas dans la table', OLD.groupe, OLD.projet;
     elseif (select g.est_valide from projet.groupes g where g.num = old.groupe and g.id_projet = old.projet) then
@@ -615,13 +607,16 @@ BEGIN
         SET nb_membres = nb_membres - 1
         WHERE num = OLD.groupe
           and id_projet = OLD.projet;
+
+        raise notice 'Le nombre de membre du groupe % du projet % a été décrémenté', OLD.groupe, OLD.projet;
     end if;
-    RETURN new;
+    RETURN OLD;
 END;
 $$ LANGUAGE plpgsql;
 
+
 CREATE TRIGGER trigger_decrementer_nb_membres
-    BEFORE DELETE
+    AFTER DELETE
     on projet.membres_groupe
     FOR EACH ROW
 EXECUTE FUNCTION projet.decrementer_nb_membres();
