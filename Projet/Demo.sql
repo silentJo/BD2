@@ -19,8 +19,8 @@ select * from projet.encoder_etudiant('Damas', 'Christophe', 'cd@student.vinci.b
 --et « Stéphanie Ferneeuw » (sf@student.vinci.be).
 select * from projet.encoder_etudiant('Ferneeuw', 'Stéphanie', 'sf@student.vinci.be', 'mdp');
 --Les deux étudiants sont inscrits au cours de BD2.
-call projet.inscrire_etudiant(1, 'BINV2040');
-call projet.inscrire_etudiant(2, 'BINV2040');
+call projet.inscrire_etudiant('cd@student.vinci.be', 'BINV2040');
+call projet.inscrire_etudiant('sf@student.vinci.be', 'BINV2040');
 -- BD2 contient deux projet avec les infos suivantes :
 --« projet SQL » (nom : « projet SQL », identifiant : « projSQL », date début : « 10/09/2023 », date fin : « 15/12/2023 »)
 select * from projet.creer_projet( 'projSQL','BINV2040', 'projet SQL', '2023-09-10', '2023/12/15');
@@ -44,11 +44,11 @@ select * from projet.encoder_etudiant('Cambron', 'Isabelle', 'ic@student.vinci.b
 --c. __Inscrire l’étudiante Isabelle Cambron à « BINV2040 »
 --call projet.inscrire_etudiant(3, 'BINV2040');
 --d. Inscrire l’étudiante Isabelle Cambron à « BINV2140 »
-call projet.inscrire_etudiant(3, 'BINV2140');
+call projet.inscrire_etudiant('ic@student.vinci.be', 'BINV2140');
 --e. Inscrire l’étudiante Stéphanie Ferneeuw à « BINV2140 »
-call projet.inscrire_etudiant(2, 'BINV2140');
+call projet.inscrire_etudiant('sf@student.vinci.be', 'BINV2140');
 --f. Inscrire l’étudiante Christophe Damas à « BINV2140 »
-call projet.inscrire_etudiant(1, 'BINV2140');
+call projet.inscrire_etudiant('cd@student.vinci.be', 'BINV2140');
 --g. Créer le projet suivant pour BINV2140 : « projet SD2 » (nom), « projSD »(identifiant),
 --« 1/03/2023 » (date début), « 1/4/2023 »(date fin).
 select * from projet.creer_projet('projSD', 'BINV2140','projet SD2','2023/03/01','2023/04/01');
