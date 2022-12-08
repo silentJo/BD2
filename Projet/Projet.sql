@@ -406,22 +406,31 @@ order by g.num;
 CREATE OR REPLACE procedure projet.valider_groupe(nidentifiant VARCHAR(20), nnum_groupe INTEGER) AS
 $$
 DECLARE
-    id_projet_recherche INTEGER := 0;
+    projetid INTEGER;
+    groupeRecherche projet.groupes%rowtype;
 BEGIN
     raise notice 'valider groupe';
-    id_projet_recherche := (select p.id from projet.projets p where p.identifiant = nidentifiant);
+    projetiD := (select P.id from projet.projets p where p.identifiant = nidentifiant);
+    groupeRecherche := (select * from projet.groupes g where g.num = nnum_groupe and g.id_projet = projetId);
+
+    if(groupeRecherche.nb_membres < groupeRecherche.nb_places)
+        then raise exception 'groupe incomplet';
+    end if;
+
     UPDATE projet.groupes g
     SET est_valide = true
-    WHERE g.id_projet = id_projet_recherche
+    WHERE g.id_projet = projetId
       AND g.num = nnum_groupe;
 END;
 $$ language plpgsql;
 /*
 CREATE OR REPLACE FUNCTION projet.check_groupe_complet() RETURNS trigger as
 $$
+DECLARE
+
 BEGIN
-    raise notice 'trigger groupe complet TODO !!!!';
-    IF (false)
+    raise notice 'trigger groupe complet';
+    IF (new.nb_membres < new.nb_places)
     THEN
         RAISE EXCEPTION 'Le groupe n est pas complet';
     END IF;

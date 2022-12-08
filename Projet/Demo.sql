@@ -76,8 +76,14 @@ select * from projet.visualiser_mes_cours where "etudiant" = 1;
 select * from projet.inscription_groupe(1, 'projSD', 1);
 --c. __Se rajouter au groupe 2 du projet projSD
 --select * from projet.inscription_groupe(1, 'projSD', 2);
+
+
+
 --d. Se retirer du projet projSD
 call projet.retirer_du_groupe(1, 1, 'projSD');
+
+
+
 --e. Se rajouter au groupe 2 du projet projSD
 select * from projet.inscription_groupe(1, 'projSD', 2);
 --f. __Se retirer du projet projSQL

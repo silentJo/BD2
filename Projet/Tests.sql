@@ -44,10 +44,11 @@ select * from projet.inscription_groupe(3, 'projSQL', 2);
 select * from projet.visualiser_projets;
 
 -- valider groupe
-call projet.valider_groupe('projSQL', 1);
+--call projet.valider_groupe('projSQL', 1);
 
 -- se retirer du groupe
-call projet.retirer_du_groupe(1, 'projSQL', 3);
+call projet.retirer_du_groupe(1, 3, VARCHAR(20) 'projSD');
+delete from projet.membres_groupe where etudiant = 1 and groupe = 1 and projet = 3;
 
 select g.est_valide from projet.groupes g where g.num = 1 and g.id_projet =1;
 
@@ -59,6 +60,4 @@ select * from projet.etudiants;
 select * from projet.inscriptions_cours;
 select * from projet.projets;
 select * from projet.groupes;
-select * from projet.visualiser_cours;
-select * from projet.visualiser_projets;
-select * from projet.visualiser_compo_projet;
+select * from projet.membres_groupe;
