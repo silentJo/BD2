@@ -195,7 +195,7 @@ public class AdminActions {
                             rs.getString(3));
                 }
             } catch (SQLException e) {
-                System.out.println("Impossible de visualiser les cours ...");
+                System.out.println("Impossible de visualiser les cours.");
                 ApplicationCentrale.getException(e);
             }
         } catch (SQLException e) {
