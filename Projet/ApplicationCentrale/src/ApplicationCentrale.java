@@ -10,7 +10,7 @@ public class ApplicationCentrale {
     private String url = "jdbc:postgresql://localhost:5432/postgres";
 
     private Connection connection = null;
-    private PreparedStatement example;
+    private AdminActions adminActions = null;
 
     public ApplicationCentrale(){
         try {
@@ -27,49 +27,52 @@ public class ApplicationCentrale {
             System.out.println("Connection au serveur échouée : " + e.getMessage());
             System.exit(1);
         }
+        adminActions = new AdminActions(connection);
     }
 
-    public void example() {
-        try {
-            example = connection.prepareStatement("SELECT * FROM projet.cours()");
-
-            System.out.printf("\n%-10s %-20s", "Output",
-                    example.execute() == true ? "example OK !\n" : "example KO !\n");
-        } catch (SQLException e) {
-            getException(e);
-        }
-    }
-
-    private void getException(Exception e) {
+    static void getException(Exception e) {
         String string = "Exception levée : " + e.getLocalizedMessage().split(":")[1].split("Où")[0] + "\n";
         System.out.println(string);
     }
 
     public static void main(String[] args) {
         boolean running = true;
-        String FORMAT_MENU = "%-10s  %-40s | %-10s %-40s | %-10s %-40s\n";
-        String FORMAT_INPUT = "%-10s %-40s";
-        String FORMAT_OUTPUT_MESSAGE = "%-10s %-20s\n\n";
         String choix = "0";
         ApplicationCentrale app = new ApplicationCentrale();
 
         System.out.println();
         while(running) {
-            System.out.println("\n1 - example\n");
+            System.out.println("1 - Ajouter un cours");
+            System.out.println("2 - Ajouter un étudiant");
+            System.out.println("3 - Inscrire un étudiant à un cours");
+            System.out.println("4 - Créer un projet pour un cours");
+            System.out.println("5 - Créer des groupes pour un projet");
+            System.out.println("6 - Visualiser les cours");
+            System.out.println("7 - Visualiser tous les projets");
+            System.out.println("8 - Visualiser toutes les compositions de groupe d’un projet");
+            System.out.println("9 - Valider un groupe");
+            System.out.println("10 - valider tous les groupes d'un projet");
+            System.out.println("q - Fermer l'application \n");
 
+            System.out.print("Votre choix : ");
             choix = scanner.nextLine();
 
             switch (choix) {
-                case "1": {
-                    app.example();
-                    break;
-                }
-                default:
-                    System.out.printf(FORMAT_OUTPUT_MESSAGE, "Output", "Veuillez choisir un chiffre entre 1 et 10!\n");
-
-                    break;
+                case "1" -> app.adminActions.addCourse();
+                case "2" -> app.adminActions.addStudent();
+                case "3" -> app.adminActions.enrollStudentInCourse();
+                case "4" -> app.adminActions.createCourseProject();
+                case "5" -> app.adminActions.createProjectGroups();
+                case "6" -> app.adminActions.seeCourses();
+                case "7" -> app.adminActions.seeAllProjects();
+                case "8" -> app.adminActions.seeProjectGroupsCompositions();
+                case "9" -> app.adminActions.validateGroup();
+                case "10" -> app.adminActions.validateAllProjectGroups();
+                case "q" -> running = false;
+                default ->
+                        System.out.println("Veuillez choisir un chiffre entre 1 et 10!");
             }
-
+            System.out.println("\n\n");
         }
         app.close();
     }
@@ -78,7 +81,8 @@ public class ApplicationCentrale {
         try {
             System.out.println("Tentative de déconnexion: ");
             connection.close();
-            System.out.println("Deconnecté du serveur : " + url);
+            System.out.println("Déconnecté du serveur : " + url);
+            System.out.println("Aurevoir !");
         } catch (SQLException e) {
             System.out.println("Problème de déconnexion !");
             getException(e);
