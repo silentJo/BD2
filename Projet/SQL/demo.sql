@@ -76,14 +76,8 @@ select * from projet.visualiser_mes_cours where "etudiant" = 1;
 select * from projet.inscription_groupe(1, 'projSD', 1);
 --c. __Se rajouter au groupe 2 du projet projSD
 --select * from projet.inscription_groupe(1, 'projSD', 2);
-
-
-
 --d. Se retirer du projet projSD
 call projet.retirer_du_groupe(1, 1, 'projSD');
-
-
-
 --e. Se rajouter au groupe 2 du projet projSD
 select * from projet.inscription_groupe(1, 'projSD', 2);
 --f. __Se retirer du projet projSQL
@@ -93,7 +87,7 @@ select * from projet.visualiser_mes_projets where "Etudiant" = 1;
 --h. Visualiser tous les projets pour lesquels il n’a pas encore de groupe
 select * from projet.visualiser_mes_projets_sans_groupes where "Etudiant" = 1;
 --i. Visualiser toutes les compositions de groupes incomplets du projet projSD
-select * from projet.visualiser_groupes_incomplets where "Identifiant" = 'projSD';
+select * from projet.visualiser_groupes_incomplets (VARCHAR(20) 'projSD') where "Etudiant" = 1;
 --3. Retour sur l’application centrale
 --a. __Valider le groupe 2 du projet projSD
 --call projet.valider_groupe('projSD', 2);

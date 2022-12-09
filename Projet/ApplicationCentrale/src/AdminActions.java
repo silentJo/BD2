@@ -236,13 +236,6 @@ public class AdminActions {
     }
 
     public void visualiserCompoProjet() {
-        /*String sql = "select * from projet.visualiser_compo_projet where \"Identifiant\" = (?)";
-
-        System.out.println("\nIdentifiant : ");
-        String identifiant = scanner.nextLine();
-
-        sql = sql.replace("(?)", identifiant);
-*/
         try {
             visualiserCompoProjetPreparedStatement = connection.prepareStatement("select * from projet.visualiser_compo_projet where \"Identifiant\" = (?)");
 

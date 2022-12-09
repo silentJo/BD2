@@ -178,7 +178,7 @@ CREATE OR REPLACE VIEW projet.visualiser_mes_projets AS
 SELECT p.id        AS "Identifiant projet",
        p.nom       AS "Nom projet",
        c.code      AS "Code cours",
-       g.num       AS "Num groupe", /*groupe DONT IL FAIT PARTIE ou null*/
+       g.num       AS "Num groupe", /*groupe DONT IL FAIT PARTIE ou <null>*/
        ic.etudiant AS "Etudiant"
 FROM projet.groupes g
          LEFT JOIN projet.projets p ON g.id_projet = p.id
@@ -194,15 +194,17 @@ FROM projet.groupes g
     identifiant, son nom, l’identifiant du cours, sa date de début et sa date de fin.
  */
 CREATE OR REPLACE VIEW projet.visualiser_mes_projets_sans_groupes AS
-SELECT p.id         AS "Identifiant",
+SELECT p.identifiant         AS "Identifiant",
        p.nom        AS "Nom",
+       c.code      as "Cours",
        p.date_debut AS "Début",
        p.date_fin   AS "Fin",
        ic.etudiant  AS "Etudiant"
 FROM projet.projets p
          LEFT JOIN projet.cours c ON p.cours = c.code
          LEFT JOIN projet.inscriptions_cours ic ON c.code = ic.cours
-WHERE p.nb_groupes = 0;
+WHERE p.nb_groupes = 0
+group by p.identifiant, p.nom, c.code, p.date_debut, p.date_fin, ic.etudiant;
 
 
 --============================================================================
@@ -222,18 +224,24 @@ WHERE p.nb_groupes = 0;
     4           ferneeuw    stéphanie   1
     7           null        null        2
  */
-CREATE OR REPLACE VIEW projet.visualiser_groupes_incomplets AS
-SELECT g.num                        AS "Numéro",
-       e.nom                        AS "Nom",
-       e.prenom                     AS "Prénom",
-       (g.nb_places - g.nb_membres) AS "Nombre de places",
-       e.id                         AS "Etudiant",
-       p.identifiant                AS "Identifiant"
-FROM projet.groupes g,
-     projet.membres_groupe mg,
-     projet.etudiants e,
-     projet.projets p
-WHERE g.num = mg.groupe
-  AND g.id_projet = mg.projet
-  AND mg.etudiant = e.id
-  AND g.nb_membres < g.nb_places;
+CREATE OR REPLACE FUNCTION projet.visualiser_groupes_incomplets(nidentifiant VARCHAR(20)) RETURNS  VOID AS
+$$
+BEGIN
+    SELECT g.num                        AS "Numéro",
+           e.nom                        AS "Nom",
+           e.prenom                     AS "Prénom",
+           (g.nb_places - g.nb_membres) AS "Nombre de places",
+           e.id                         AS "Etudiant",
+           p.identifiant                AS "Identifiant"
+    FROM projet.groupes g,
+         projet.membres_groupe mg,
+         projet.etudiants e,
+         projet.projets p
+    WHERE g.num = mg.groupe
+      AND g.id_projet = mg.projet
+      AND mg.etudiant = e.id
+      AND p.identifiant = nidentifiant
+      AND g.nb_membres < g.nb_places
+    group by g.num, e.nom, e.prenom, (g.nb_places - g.nb_membres), e.id, p.identifiant;
+END;
+$$language plpgsql;
