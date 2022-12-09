@@ -1,4 +1,3 @@
-
 --============================================================================
 --=                            APPLICATION CENTRALE                          =
 --============================================================================
@@ -49,8 +48,8 @@ $$
 DECLARE
     id_etudiant INTEGER := -1;
 BEGIN
-    RAISE NOTICE 'Inscrire un etudiant';
     id_etudiant := (SELECT e.id FROM projet.etudiants e WHERE e.email = nemail);
+    RAISE NOTICE 'Inscrire l''étudiant % au cours %', id_etudiant, ncode;
     IF (id_etudiant <> -1) THEN
     ELSE
         RAISE EXCEPTION 'L''email % n''existe pas', nemail;
@@ -60,41 +59,26 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION projet.check_cours_existant() RETURNS TRIGGER AS
+CREATE OR REPLACE FUNCTION projet.check_inscription_valide() RETURNS TRIGGER AS
 $$
 BEGIN
-    RAISE NOTICE 'trigger cours existant';
-    IF (NOT EXISTS(SELECT 1 FROM projet.cours c WHERE c.code = new.cours))
-    THEN
-        RAISE EXCEPTION 'Le cours renseigné n existe pas';
+    RAISE NOTICE 'Vérification des données fournies ...';
+    IF (NOT EXISTS(SELECT 1 FROM projet.cours c WHERE c.code = new.cours)) THEN
+        RAISE EXCEPTION 'Le cours % n''existe pas', new.cours;
+    ELSEIF (NOT EXISTS(SELECT 1 FROM projet.etudiants e WHERE e.id = new.etudiant)) THEN
+        RAISE EXCEPTION 'L''étudiant % n''existe pas', new.etudiant;
+    ELSEIF (EXISTS(SELECT 1 FROM projet.projets p WHERE p.cours = new.cours)) THEN
+        RAISE EXCEPTION 'Inscription impossible car le cours % contient déjà un projet', new.cours;
     END IF;
     RETURN new;
-END;
+END ;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trigger_check_cours_existant
+CREATE OR REPLACE TRIGGER trigger_check_inscription_valide
     BEFORE INSERT
     ON projet.inscriptions_cours
     FOR EACH ROW
-EXECUTE PROCEDURE projet.check_cours_existant();
-
-CREATE OR REPLACE FUNCTION projet.check_cours_avec_projet() RETURNS TRIGGER AS
-$$
-BEGIN
-    RAISE NOTICE 'trigger cours avec projet';
-    IF (EXISTS(SELECT 1 FROM projet.projets p WHERE (p.cours = new.cours)))
-    THEN
-        RAISE EXCEPTION 'Le cours contient déjà un projet';
-    END IF;
-    RETURN new;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trigger_check_cours_avec_projet
-    AFTER INSERT
-    ON projet.inscriptions_cours
-    FOR EACH ROW
-EXECUTE PROCEDURE projet.check_cours_avec_projet();
+EXECUTE PROCEDURE projet.check_inscription_valide();
 
 --============================================================================
 --=                         4) CREER PROJET                                  =
@@ -113,6 +97,23 @@ BEGIN
     RETURN ret;
 END ;
 $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION projet.check_projet_valide() RETURNS TRIGGER AS
+$$
+BEGIN
+    RAISE NOTICE 'Vérification des données fournies ...';
+    IF (NOT EXISTS(SELECT 1 FROM projet.cours c WHERE c.code = new.cours)) THEN
+        RAISE EXCEPTION 'Le cours % n''existe pas', new.cours;
+    END IF;
+    RETURN new;
+END ;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER trigger_check_projet_valide
+    BEFORE INSERT OR UPDATE
+    ON projet.projets
+    FOR EACH ROW
+EXECUTE PROCEDURE projet.check_projet_valide();
 
 --============================================================================
 --=                         5) CREER GROUPES                                 =
@@ -167,12 +168,28 @@ BEGIN
             LOOP
                 nb_groupes_actuel := nb_groupes_actuel + 1;
                 UPDATE projet.projets SET nb_groupes = nb_groupes_actuel WHERE id = id_projet;
-                INSERT INTO projet.groupes
-                VALUES (nb_groupes_actuel, id_projet, nnb_places, DEFAULT, DEFAULT);
+                INSERT INTO projet.groupes VALUES (nb_groupes_actuel, id_projet, nnb_places, DEFAULT, DEFAULT);
             END LOOP;
     END IF;
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION projet.check_groupe_valide() RETURNS TRIGGER AS
+$$
+BEGIN
+    RAISE NOTICE 'Vérification des données fournies ...';
+    IF (NOT EXISTS(SELECT 1 FROM projet.projets p WHERE p.id = new.id_projet)) THEN
+        RAISE EXCEPTION 'Le projet % n''existe pas', new.id_projet;
+    END IF;
+    RETURN new;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER trigger_check_groupe_valide
+    BEFORE INSERT OR UPDATE
+    ON projet.groupes
+    FOR EACH ROW
+EXECUTE PROCEDURE projet.check_groupe_valide();
 
 --============================================================================
 --=                          6) VISUALISER COURS                             =
@@ -246,46 +263,36 @@ ORDER BY g.num;
 CREATE OR REPLACE PROCEDURE projet.valider_groupe(nidentifiant VARCHAR(20), nnum_groupe INTEGER) AS
 $$
 DECLARE
-    projetid        INTEGER;
-    groupeRecherche projet.groupes%ROWTYPE;
+    projetID INTEGER;
 BEGIN
-    RAISE NOTICE 'Valider le groupe % du projet %', nnum_groupe, nidentifiant;
-    projetiD := (SELECT P.id FROM projet.projets p WHERE p.identifiant = nidentifiant);
-    groupeRecherche := (SELECT * FROM projet.groupes g WHERE g.num = nnum_groupe AND g.id_projet = projetId);
-
-    IF (groupeRecherche.nb_membres < groupeRecherche.nb_places) THEN
-        RAISE EXCEPTION 'Le groupe est incomplet et ne peut pas être validé';
-    END IF;
+    projetID := (SELECT p.id FROM projet.projets p WHERE p.identifiant = nidentifiant);
 
     UPDATE projet.groupes g
     SET est_valide = TRUE
-    WHERE g.id_projet = projetId
+    WHERE g.id_projet = projetID
       AND g.num = nnum_groupe;
+    RAISE NOTICE 'Groupe % du projet % validé!', nnum_groupe, nidentifiant;
 END;
 $$ LANGUAGE plpgsql;
 
-
-/* TODO rework
-CREATE OR REPLACE FUNCTION projet.check_groupe_complet() RETURNS trigger as
+CREATE OR REPLACE FUNCTION projet.check_groupe_complet() RETURNS TRIGGER AS
 $$
-DECLARE
-
 BEGIN
-    raise notice 'trigger groupe complet';
-    IF (new.nb_membres < new.nb_places)
-    THEN
-        RAISE EXCEPTION 'Le groupe n est pas complet';
+    RAISE NOTICE 'Vérification du groupe ...';
+    /* quand on essaie de valider un groupe incomplet */
+    IF (new.est_valide AND old.nb_membres < old.nb_places) THEN
+        RAISE EXCEPTION 'Le groupe est incomplet et ne peut pas être validé';
     END IF;
-    RETURN NEW;
-END
-$$ language plpgsql;
+    RETURN new;
+END;
+$$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trigger_check_groupe_complet
+CREATE OR REPLACE TRIGGER trigger_check_groupe_complet
     BEFORE UPDATE
-    on projet.groupes
+    ON projet.groupes
     FOR EACH ROW
 EXECUTE PROCEDURE projet.check_groupe_complet();
-*/
+
 --============================================================================
 --=                        10) VALIDER GROUPES                               =
 --============================================================================

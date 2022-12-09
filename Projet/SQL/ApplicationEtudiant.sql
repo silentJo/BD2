@@ -83,7 +83,7 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trigger_increment_membre_groupe
+CREATE OR REPLACE TRIGGER trigger_increment_membre_groupe
     BEFORE INSERT
     ON projet.membres_groupe
     FOR EACH ROW
@@ -108,7 +108,7 @@ $$
     END;
 $$ language plpgsql;
 
-CREATE TRIGGER trigger_check_etudiant_inscrit_au_cours
+CREATE OR REPLACE TRIGGER trigger_check_etudiant_inscrit_au_cours
     BEFORE INSERT
     ON projet.membres_groupe
     FOR EACH ROW
@@ -159,7 +159,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE TRIGGER trigger_decrementer_nb_membres
+CREATE OR REPLACE TRIGGER trigger_decrementer_nb_membres
     AFTER DELETE
     ON projet.membres_groupe
     FOR EACH ROW
