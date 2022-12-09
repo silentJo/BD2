@@ -18,17 +18,18 @@ public class AdminActions {
         try {
             encoderCoursPreparedStatement = connection.prepareStatement("SELECT * FROM projet.encoder_cours(?, ?, ?, ?)");
             try {
-                System.out.print("\nCode du cours : ");
-                String code = scanner.nextLine();
 
                 System.out.print("\nNom du cours : ");
                 String nom = scanner.nextLine();
 
+                System.out.print("\nCode du cours : ");
+                String code = scanner.nextLine();
+
+                System.out.print("\nNombre de ects : ");
+                String nbCredits = scanner.nextLine();
+
                 System.out.print("\nBloc : ");
                 String bloc = scanner.nextLine();
-
-                System.out.print("\nNombre de crédits : ");
-                String nbCredits = scanner.nextLine();
 
                 encoderCoursPreparedStatement.setString(1, code.toUpperCase());
                 encoderCoursPreparedStatement.setString(2, nom);
@@ -52,11 +53,11 @@ public class AdminActions {
         try {
             encoderEtudiantPreparedStatement = connection.prepareStatement("SELECT * FROM projet.encoder_etudiant(?, ?, ?, ?)");
             try {
-                System.out.print("\nNom de l'étudiant : ");
-                String nom = scanner.nextLine();
-
                 System.out.print("\nPrénom de l'étudiant : ");
                 String prenom = scanner.nextLine();
+
+                System.out.print("\nNom de l'étudiant : ");
+                String nom = scanner.nextLine();
 
                 System.out.print("\nEmail : ");
                 String email = scanner.nextLine();
@@ -89,13 +90,13 @@ public class AdminActions {
         try {
             inscrireEtudiantPreparedStatement = connection.prepareCall("CALL projet.inscrire_etudiant(?, ?)");
             try {
-                System.out.print("\nID de l'étudiant : ");
-                String idEtudiant = scanner.nextLine();
+                System.out.print("\nEmail de l'étudiant : ");
+                String emailEtudiant = scanner.nextLine();
 
                 System.out.print("\nCode du cours : ");
                 String code = scanner.nextLine();
 
-                inscrireEtudiantPreparedStatement.setInt(1, Integer.parseInt(idEtudiant));
+                inscrireEtudiantPreparedStatement.setString(1, emailEtudiant);
                 inscrireEtudiantPreparedStatement.setString(2, code.toUpperCase());
 
                 System.out.printf("%-10s %-20s", "Output",
@@ -116,14 +117,15 @@ public class AdminActions {
         try {
             creerProjetPreparedStatement = connection.prepareCall("SELECT * FROM projet.creer_projet(?, ?, ?, ?, ?)");
             try {
-                System.out.println("\nIdentifiant du projet :");
-                String identifiant = scanner.nextLine();
 
-                System.out.println("\nNom du cours : ");
+                System.out.println("\nCode du cours : ");
                 String nomCours = scanner.nextLine();
 
                 System.out.println("\nNom du projet : ");
                 String nomProjet = scanner.nextLine();
+
+                System.out.println("\nIdentifiant du projet :");
+                String identifiant = scanner.nextLine();
 
                 System.out.println("\nDate début (YYYY-MM-DD) : ");
                 String dateDebut = scanner.nextLine();
@@ -208,17 +210,17 @@ public class AdminActions {
         try {
             visualiserProjetsPreparedStatement = connection.prepareStatement("SELECT * FROM projet.visualiser_projets");
             try (ResultSet rs = visualiserProjetsPreparedStatement.executeQuery()) {
-                System.out.printf("%-10s     | %-10s | %-20s | %-20s | %-10s | %-10s | %-10s | %-20s | \n", "", "Numéro", "Nom", "Prénom", "Complets?", "Validés?", "id", "identifiant");
+                System.out.printf("%-10s     | %-20s | %-20s | %-20s | %-10s | %-10s | %-10s | \n", "",
+                        "Identifiant", "Nom", "Code", "nb Groupes", "nb Complets", "nb Valides");
                 while (rs.next()) {
-                    System.out.printf("%-10s     | %-10s | %-20s | %-20s | %-10s | %-10s | %-10s | %-20s | \n",
+                    System.out.printf("%-10s ->   %-20s | %-20s | %-20s | %-10s | %-10s | %-10s | \n",
                             "Projet",
-                            rs.getInt(1),
+                            rs.getString(1),
                             rs.getString(2),
                             rs.getString(3),
-                            rs.getString(4),
+                            rs.getInt(4),
                             rs.getInt(5),
-                            rs.getInt(6),
-                            rs.getString(7));
+                            rs.getInt(6));
                 }
                 System.out.println();
 
@@ -233,12 +235,20 @@ public class AdminActions {
     }
 
     public void visualiserCompoProjet() {
+        String sql = "select * from projet.visualiser_compo_projet where \"Identifiant\" = (?)";
+
+        System.out.println("\nIdentifiant : ");
+        String identifiant = scanner.nextLine();
+
+        sql = sql.replace("(?)", identifiant);
+
         try {
-            visualiserCompoProjetPreparedStatement = connection.prepareStatement("SELECT * FROM projet.visualiser_compo_projet");
+            visualiserCompoProjetPreparedStatement = connection.prepareStatement(sql);
             try (ResultSet rs = visualiserCompoProjetPreparedStatement.executeQuery()) {
-                System.out.printf("%-10s     | %-10s | %-20s | %-20s | %-10s | %-10s | \n", "", "Numéro", "Nom", "Prénom", "Complet?", "Validé?");
+                System.out.printf("%-10s     | %-10s | %-20s | %-20s | %-10s | %-10s | \n",
+                        "", "Numéro", "Nom", "Prénom", "Complet?", "Validé?");
                 while (rs.next()) {
-                    System.out.printf("%-10s     | %-10s | %-20s | %-20s | %-10s | %-10s | \n",
+                    System.out.printf("%-10s ->  | %-10s | %-20s | %-20s | %-10s | %-10s | \n",
                             "Projet",
                             rs.getInt(1),
                             rs.getString(2),

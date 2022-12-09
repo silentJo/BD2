@@ -15,9 +15,9 @@ select * from projet.encoder_cours('BINV2040', 'BD 2', 2, 6);
 select * from projet.encoder_cours('BINV1020', 'APOO', 1, 6);
 --Il faut également ajouter deux étudiants :
 --« Christophe Damas » (cd@student.vinci.be)
-select * from projet.encoder_etudiant('Damas', 'Christophe', 'cd@student.vinci.be', 'mdp');
+select * from projet.encoder_etudiant('Damas', 'Christophe', 'cd@student.vinci.be', '$2a$10$248B3aPzoMJ63eEBQtgGJemgEaHr83hgM87lxwbONTxdH9YQUHlH6');
 --et « Stéphanie Ferneeuw » (sf@student.vinci.be).
-select * from projet.encoder_etudiant('Ferneeuw', 'Stéphanie', 'sf@student.vinci.be', 'mdp');
+select * from projet.encoder_etudiant('Ferneeuw', 'Stéphanie', 'sf@student.vinci.be', '$2a$10$248B3aPzoMJ63eEBQtgGJemgEaHr83hgM87lxwbONTxdH9YQUHlH6');
 --Les deux étudiants sont inscrits au cours de BD2.
 call projet.inscrire_etudiant('cd@student.vinci.be', 'BINV2040');
 call projet.inscrire_etudiant('sf@student.vinci.be', 'BINV2040');
@@ -40,7 +40,7 @@ Les étapes à effectuer sont les suivantes (les étapes commençant par __ ne d
 --a. Ajouter le cours « SD2 » (code : « BINV2140 », 3 ects, bloc 2)
 select * from projet.encoder_cours('BINV2140', 'SD 2', 2, 3);
 --b. Ajouter l’étudiante « Isabelle Cambron » (ic@student.vinci.be)
-select * from projet.encoder_etudiant('Cambron', 'Isabelle', 'ic@student.vinci.be', 'mdp');
+select * from projet.encoder_etudiant('Cambron', 'Isabelle', 'ic@student.vinci.be', '$2a$10$248B3aPzoMJ63eEBQtgGJemgEaHr83hgM87lxwbONTxdH9YQUHlH6');
 --c. __Inscrire l’étudiante Isabelle Cambron à « BINV2040 »
 --call projet.inscrire_etudiant(3, 'BINV2040');
 --d. Inscrire l’étudiante Isabelle Cambron à « BINV2140 »
@@ -60,7 +60,6 @@ call projet.creer_groupes('projSD', 1, 1);
 --call projet.creer_groupes('projSD', 3, 1);
 --k. Créer 1 groupe de 2 pour le projet projSD
 call projet.creer_groupes('projSD', 1, 2);
-select * from projet.groupes;
 --l. __Créer 2 groupes de 2 pour le projet Javascript
 --call projet.creer_groupes('Javascript', 2, 2);
 --m. Visualiser les cours
@@ -68,7 +67,11 @@ select * from projet.visualiser_cours;
 --n. Visualiser tous les projets
 select * from projet.visualiser_projets;
 --o. Visualiser toutes les compositions de groupes du projet projSD
-select * from projet.visualiser_compo_projet where "Identifiant" = 'projSD';
+/*
+select * from projet.visualiser_compo_projet(VARCHAR(20) 'projSD')
+    as t(id integer, nom text , prenom text, complets boolean, valide boolean);
+ */
+ select * from projet.visualiser_compo_projet where "Identifiant" = 'projSD';
 --2. Authentifier Damas
 --a. Visualiser les cours auxquels il participe
 select * from projet.visualiser_mes_cours where "etudiant" = 1;
@@ -76,14 +79,8 @@ select * from projet.visualiser_mes_cours where "etudiant" = 1;
 select * from projet.inscription_groupe(1, 'projSD', 1);
 --c. __Se rajouter au groupe 2 du projet projSD
 --select * from projet.inscription_groupe(1, 'projSD', 2);
-
-
-
 --d. Se retirer du projet projSD
 call projet.retirer_du_groupe(1, 1, 'projSD');
-
-
-
 --e. Se rajouter au groupe 2 du projet projSD
 select * from projet.inscription_groupe(1, 'projSD', 2);
 --f. __Se retirer du projet projSQL
@@ -100,17 +97,22 @@ select * from projet.visualiser_groupes_incomplets where "Identifiant" = 'projSD
 --b. __Valider le groupe 3 du projet projSD
 --
 --c. Visualiser toutes les compositions du groupe du projet projSD
+/*
+select * from projet.visualiser_compo_projet('projSD')
+    t(id integer, nom text, prenom text, complets boolean, valide boolean);
+*/
 select * from projet.visualiser_compo_projet where "Identifiant" = 'projSD';
 --4. Authentifier Ferneeuw
 --a. Se rajouter au groupe 2 du projet projSD
 select * from projet.inscription_groupe(2, 'projSD', 2);
 --b. Visualiser toutes les compositions de groupes incomplets du projet projSD
-select * from projet.visualiser_compo_projet where "Identifiant" = 'projSD';
+select * from projet.visualiser_compo_projet('projSD') t(id integer, nom text, prenom text, complets boolean, valide boolean);
 --5. Retour à l’application centrale
 --a. __Valider tous les groupes du projSD
 --call projet.valider_groupes('projSD');
 --b. Visualiser toutes les compositions du groupe du projet projSD
-select * from projet.visualiser_compo_projet where "Identifiant" = 'projSD';
+select * from projet.visualiser_compo_projet('projSD')
+    t(id integer, nom text, prenom text, complets boolean, valide boolean);
 --6. Authentifier Cambron
 --a. __Se rajouter au groupe 1 du projet projSQL
 --
@@ -122,11 +124,13 @@ select * from projet.inscription_groupe(3, 'projSD', 1);
 --a. Visualiser tous les projets
 select * from projet.visualiser_projets;
 --b. Visualiser toutes les compositions de groupe du projet projSD
-select * from projet.visualiser_compo_projet where "Identifiant" = 'projSD';
+select * from projet.visualiser_compo_projet('projSD')
+    t(id integer, nom text, prenom text, complets boolean, valide boolean);
 --c. Valider le groupe 2 du projet projSD
 call projet.valider_groupe('projSD', 2);
 --d. Visualiser toutes les compositions du groupe du projet projSD
-select * from projet.visualiser_compo_projet where "Identifiant" = 'projSD';
+select * from projet.visualiser_compo_projet('projSD')
+    t(id integer, nom text, prenom text, complets boolean, valide boolean);
 --e. Valider tous les groupes du projSD
 call projet.valider_groupes('projSD');
 --f. Visualiser tous les projets

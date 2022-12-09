@@ -397,19 +397,18 @@ ORDER BY p.id;
     3       null        null            false       false
  */
 CREATE OR REPLACE VIEW projet.visualiser_compo_projet AS
-SELECT DISTINCT g.num                        AS "Numéro",
-                e.nom                        AS "Nom",
-                e.prenom                     AS "Prénom",
-                (g.nb_places = g.nb_membres) AS "Complet ?",
-                g.est_valide                 AS "Validé ?",
-                g.id_projet                  AS "ProjetID",
-                p.identifiant                AS "Identifiant"
-FROM projet.groupes g
-         LEFT JOIN projet.membres_groupe mg ON g.num = mg.groupe AND g.id_projet = mg.projet
-         LEFT JOIN projet.etudiants e ON mg.etudiant = e.id
-         LEFT JOIN projet.projets p ON p.id = g.id_projet
-GROUP BY g.num, e.nom, e.prenom, g.nb_places, g.nb_membres, g.est_valide, g.id_projet, p.identifiant
-ORDER BY g.num;
+    SELECT DISTINCT g.num                        AS "Numéro",
+                    e.nom                        AS "Nom",
+                    e.prenom                     AS "Prénom",
+                    (g.nb_places = g.nb_membres) AS "Complet ?",
+                    g.est_valide                 AS "Validé ?",
+                    p.identifiant                AS "Identifiant"
+    FROM projet.groupes g
+             LEFT JOIN projet.membres_groupe mg ON g.num = mg.groupe AND g.id_projet = mg.projet
+             LEFT JOIN projet.etudiants e ON mg.etudiant = e.id
+             LEFT JOIN projet.projets p ON p.id = g.id_projet
+    GROUP BY g.num, e.nom, e.prenom, g.nb_places, g.nb_membres, g.est_valide, p.identifiant
+    ORDER BY g.num;
 
 --============================================================================
 --=                         9) VALIDER GROUPE                                =
@@ -491,6 +490,19 @@ $$ LANGUAGE plpgsql;
 --============================================================================
 --=                            APPLICATION ETUDIANT                          =
 --============================================================================
+
+--============================================================================
+--=                             1) SE CONNECTER                              =
+--============================================================================
+CREATE OR REPLACE FUNCTION projet.seConnecter(nemail VARCHAR(50)) RETURNS RECORD AS
+$$
+DECLARE
+    etudiant RECORD;
+BEGIN
+    SELECT id, mdp FROM projet.etudiants WHERE email = nemail INTO etudiant;
+    RETURN etudiant;
+END;
+$$ language plpgsql;
 
 --============================================================================
 --=                     1) VISUALISER MES COURS                              =

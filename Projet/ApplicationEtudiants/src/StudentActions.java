@@ -18,10 +18,10 @@ public class StudentActions {
         this.connection = connection;
     }
 
-    public void seConnecter() {
+    public boolean seConnecter() {
         try {
             seConnecterPreparedStatement = connection.prepareStatement("SELECT * FROM projet.seConnecter(?) " +
-                    "t(id INTEGER, mdp VARCHAR(74))");
+                    "t(id INTEGER, mdp VARCHAR(60))");
             try {
                 System.out.println("Email : ");
                 String email = scanner.next();
@@ -39,8 +39,10 @@ public class StudentActions {
                         if (BCrypt.checkpw(mdp, hashedMDP)) {
                             idEtudiant = id;
                             System.out.println("id étudiant : " + idEtudiant);
+                            return true;
                         } else {
                             System.out.println("Impossible de se connecter");
+                            return false;
                         }
                     }
                 }
@@ -52,6 +54,7 @@ public class StudentActions {
             System.out.println("L'ajout de cours a échoué ! -> prepareStatement KO !");
             ApplicationEtudiants.getException(e);
         }
+        return false;
     }
 
     public void visualiserCours() {

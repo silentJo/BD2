@@ -15,7 +15,6 @@ public class ApplicationEtudiants {
             System.out.println("Driver Postgres manquant.");
             System.exit(1);
         }
-
         try {
             // Username e.g : postgres, Password e.g : SQL123
             connection = DriverManager.getConnection(url, "postgres", "SQL123");
@@ -36,35 +35,38 @@ public class ApplicationEtudiants {
         String choix = "0";
         ApplicationEtudiants app = new ApplicationEtudiants();
 
-        System.out.println();
-        while(running) {
-            System.out.println("0 - Se connecter");
-            System.out.println("1 - visualiserCours");
-            System.out.println("2 - inscriptionAuGroupe");
-            System.out.println("3 - retirerDuGroupe");
-            System.out.println("4 - visualiserProjets");
-            System.out.println("5 - visualiserProjetsSansGroupes");
-            System.out.println("6 - visualiserGroupesIncomplets");
-            System.out.println("q - Fermer l'application \n");
+        System.out.println("Veuillez vous connecter\n");
+        if(app.studentActions.seConnecter()) {
+            while(running) {
+                System.out.println("1 - visualiserCours");
+                System.out.println("2 - inscriptionAuGroupe");
+                System.out.println("3 - retirerDuGroupe");
+                System.out.println("4 - visualiserProjets");
+                System.out.println("5 - visualiserProjetsSansGroupes");
+                System.out.println("6 - visualiserGroupesIncomplets");
+                System.out.println("q - Fermer l'application \n");
 
-            System.out.print("Votre choix : ");
-            choix = scanner.nextLine();
+                System.out.print("Votre choix : ");
+                choix = scanner.nextLine();
 
-            switch (choix) {
-                case "0" -> app.studentActions.seConnecter();
-                case "1" -> app.studentActions.visualiserCours();
-                case "2" -> app.studentActions.inscriptionAuGroupe();
-                case "3" -> app.studentActions.retirerDuGroupe();
-                case "4" -> app.studentActions.visualiserProjets();
-                case "5" -> app.studentActions.visualiserProjetsSansGroupes();
-                case "6" -> app.studentActions.visualiserGroupesIncomplets();
-                case "q" -> running = false;
-                default ->
-                        System.out.println("Veuillez choisir un chiffre entre 1 et 10!");
+                switch (choix) {
+                    case "1" -> app.studentActions.visualiserCours();
+                    case "2" -> app.studentActions.inscriptionAuGroupe();
+                    case "3" -> app.studentActions.retirerDuGroupe();
+                    case "4" -> app.studentActions.visualiserProjets();
+                    case "5" -> app.studentActions.visualiserProjetsSansGroupes();
+                    case "6" -> app.studentActions.visualiserGroupesIncomplets();
+                    case "q" -> running = false;
+                    default ->
+                            System.out.println("Veuillez choisir un chiffre entre 1 et 10!");
+                }
+                System.out.println("\n\n");
             }
-            System.out.println("\n\n");
         }
-        app.close();
+        else {
+            System.out.println("Mauvais identifiants");
+            app.close();
+        }
     }
 
     public void close() {
