@@ -195,11 +195,11 @@ public class StudentActions {
                 visualiserGroupesIncompletsPreparedStatement.setString(1, identifiant);
 
                 ResultSet rs = visualiserGroupesIncompletsPreparedStatement.executeQuery();
-                System.out.printf("%-10s     | %-10s | %-20s | %-20s | %-10s | \n",
+                System.out.printf("%-10s     | %-10s | %-20s | %-20s | %-20s | \n",
                         "", "Numéro", "Nom", "Prenom", "Nombre de places");
                 while (rs.next()) {
-                    System.out.printf("\"%-10s     | %-10s | %-20s | %-20s | %-10s | \n",
-                            "Projet",
+                    System.out.printf("\"%-10s     | %-10s | %-20s | %-20s | %-20s | \n",
+                            "Groupe",
                             rs.getInt(1),
                             rs.getString(2),
                             rs.getString(3),
