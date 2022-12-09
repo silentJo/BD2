@@ -15,9 +15,9 @@ select * from projet.encoder_cours('BINV2040', 'BD 2', 2, 6);
 select * from projet.encoder_cours('BINV1020', 'APOO', 1, 6);
 --Il faut également ajouter deux étudiants :
 --« Christophe Damas » (cd@student.vinci.be)
-select * from projet.encoder_etudiant('Damas', 'Christophe', 'cd@student.vinci.be', 'mdp');
+select * from projet.encoder_etudiant('Damas', 'Christophe', 'cd@student.vinci.be', '$2a$10$H/hwrpmkyTRwkAARnisq/uG91BvJuGNApOYqQSGjX3gAMPvMZ.jxm'); -- mdp = mdp
 --et « Stéphanie Ferneeuw » (sf@student.vinci.be).
-select * from projet.encoder_etudiant('Ferneeuw', 'Stéphanie', 'sf@student.vinci.be', 'mdp');
+select * from projet.encoder_etudiant('Ferneeuw', 'Stéphanie', 'sf@student.vinci.be', '$2a$10$H/hwrpmkyTRwkAARnisq/uG91BvJuGNApOYqQSGjX3gAMPvMZ.jxm'); -- mdp = mdp
 --Les deux étudiants sont inscrits au cours de BD2.
 call projet.inscrire_etudiant('cd@student.vinci.be', 'BINV2040');
 call projet.inscrire_etudiant('sf@student.vinci.be', 'BINV2040');
@@ -34,13 +34,13 @@ schéma de la BD, mais vous pouvez le faire si vous le souhaitez.
 Le scénario se déroule sur 2 PC en parallèle. L’application centrale est ouverte sur le premier et
 l’application utilisateur est ouverte sur le deuxième.
 Le scénario se déroule dans eclipse ou intelliJ. On ouvrira plusieurs consoles en parallèle.
-Les étapes à effectuer sont les suivantes (les étapes commençant par __ ne devraient pas fonctionner) :
+Les étapes à effectuer sont les suivantes (les étapes commençant par __ ne devraient pas fonctionner) :*/
 
-   1. Sur l’application centrale :*/
+ /*  1. Sur l’application centrale :*/
 --a. Ajouter le cours « SD2 » (code : « BINV2140 », 3 ects, bloc 2)
 select * from projet.encoder_cours('BINV2140', 'SD 2', 2, 3);
 --b. Ajouter l’étudiante « Isabelle Cambron » (ic@student.vinci.be)
-select * from projet.encoder_etudiant('Cambron', 'Isabelle', 'ic@student.vinci.be', 'mdp');
+select * from projet.encoder_etudiant('Cambron', 'Isabelle', 'ic@student.vinci.be', '$2a$10$H/hwrpmkyTRwkAARnisq/uG91BvJuGNApOYqQSGjX3gAMPvMZ.jxm'); -- mdp = mdp
 --c. __Inscrire l’étudiante Isabelle Cambron à « BINV2040 »
 --call projet.inscrire_etudiant(3, 'BINV2040');
 --d. Inscrire l’étudiante Isabelle Cambron à « BINV2140 »

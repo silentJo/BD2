@@ -228,12 +228,12 @@ SELECT DISTINCT g.num                        AS "Numéro",
                 e.prenom                     AS "Prénom",
                 (g.nb_places = g.nb_membres) AS "Complet ?",
                 g.est_valide                 AS "Validé ?",
-                g.id_projet                  AS "ProjetID"
+                p.identifiant                  AS "Identifiant"
 FROM projet.groupes g
          LEFT JOIN projet.membres_groupe mg ON g.num = mg.groupe AND g.id_projet = mg.projet
          LEFT JOIN projet.etudiants e ON mg.etudiant = e.id
          LEFT JOIN projet.projets p ON p.id = g.id_projet
-GROUP BY g.num, e.nom, e.prenom, g.nb_places, g.nb_membres, g.est_valide, g.id_projet
+GROUP BY g.num, e.nom, e.prenom, g.nb_places, g.nb_membres, g.est_valide, p.identifiant
 ORDER BY g.num;
 
 --============================================================================

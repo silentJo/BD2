@@ -86,3 +86,4 @@ CREATE TABLE projet.membres_groupe
     FOREIGN KEY (groupe, projet) REFERENCES projet.groupes (num, id_projet),
     PRIMARY KEY (etudiant, projet, groupe)
 );
+
