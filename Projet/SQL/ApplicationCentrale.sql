@@ -228,7 +228,7 @@ SELECT DISTINCT g.num                        AS "Numéro",
                 e.prenom                     AS "Prénom",
                 (g.nb_places = g.nb_membres) AS "Complet ?",
                 g.est_valide                 AS "Validé ?",
-                p.identifiant                  AS "Identifiant"
+                p.identifiant                AS "Identifiant"
 FROM projet.groupes g
          LEFT JOIN projet.membres_groupe mg ON g.num = mg.groupe AND g.id_projet = mg.projet
          LEFT JOIN projet.etudiants e ON mg.etudiant = e.id

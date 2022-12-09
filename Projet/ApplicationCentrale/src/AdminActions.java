@@ -99,8 +99,9 @@ public class AdminActions {
                 inscrireEtudiantPreparedStatement.setString(1, emailEtudiant);
                 inscrireEtudiantPreparedStatement.setString(2, code.toUpperCase());
 
+                //inscrireEtudiantPreparedStatement.executeQuery();
                 System.out.printf("%-10s %-20s", "Output",
-                        (inscrireEtudiantPreparedStatement.execute())
+                        (inscrireEtudiantPreparedStatement.executeUpdate() == 0)
                                 ? "Etudiant inscrit"
                                 : "Echec de l'inscription");
             } catch (SQLException e) {
@@ -170,7 +171,7 @@ public class AdminActions {
                 creerGroupesPreparedStatement.setInt(2, Integer.parseInt(nbGroupes));
                 creerGroupesPreparedStatement.setInt(3, Integer.parseInt(nbPlaces));
 
-                System.out.printf("%-10s %-20s", "Output", (creerGroupesPreparedStatement.execute())
+                System.out.printf("%-10s %-20s", "Output", (creerGroupesPreparedStatement.executeUpdate() == 0)
                         ? "Groupe créé"
                         : "Echec de la création du groupe");
 
@@ -215,17 +216,17 @@ public class AdminActions {
                 while (rs.next()) {
                     System.out.printf("%-10s ->   %-20s | %-20s | %-20s | %-10s | %-10s | %-10s | \n",
                             "Projet",
-                            rs.getString(1),
                             rs.getString(2),
                             rs.getString(3),
-                            rs.getInt(4),
+                            rs.getString(4),
                             rs.getInt(5),
-                            rs.getInt(6));
+                            rs.getInt(6),
+                            rs.getInt(7));
                 }
                 System.out.println();
 
             } catch (SQLException e) {
-                System.out.println("Impossible de visualiser les projets ...");
+                System.out.println("Impossible de visualiser les projets ..." +e);
                 ApplicationCentrale.getException(e);
             }
         } catch (SQLException e) {
@@ -235,15 +236,21 @@ public class AdminActions {
     }
 
     public void visualiserCompoProjet() {
-        String sql = "select * from projet.visualiser_compo_projet where \"Identifiant\" = (?)";
+        /*String sql = "select * from projet.visualiser_compo_projet where \"Identifiant\" = (?)";
 
         System.out.println("\nIdentifiant : ");
         String identifiant = scanner.nextLine();
 
         sql = sql.replace("(?)", identifiant);
-
+*/
         try {
-            visualiserCompoProjetPreparedStatement = connection.prepareStatement(sql);
+            visualiserCompoProjetPreparedStatement = connection.prepareStatement("select * from projet.visualiser_compo_projet where \"Identifiant\" = (?)");
+
+            System.out.println("\nIdentifiant : ");
+            String identifiant = scanner.nextLine();
+
+            visualiserCompoProjetPreparedStatement.setString(1, identifiant);
+
             try (ResultSet rs = visualiserCompoProjetPreparedStatement.executeQuery()) {
                 System.out.printf("%-10s     | %-10s | %-20s | %-20s | %-10s | %-10s | \n",
                         "", "Numéro", "Nom", "Prénom", "Complet?", "Validé?");

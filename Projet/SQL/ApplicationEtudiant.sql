@@ -3,6 +3,21 @@
 --=                            APPLICATION ETUDIANT                          =
 --============================================================================
 
+
+
+--============================================================================
+--=                     1) VISUALISER MES COURS                              =
+--============================================================================
+create or replace function projet.seConnecter(nemail VARCHAR(50)) RETURNS RECORD AS
+$$
+    DECLARE
+        ETUDIANT record;
+    BEGIN
+        SELECT id, mdp FROM projet.etudiants WHERE email = nemail INTO etudiant;
+        RETURN etudiant;
+    END;
+$$ language plpgsql;
+
 --============================================================================
 --=                     1) VISUALISER MES COURS                              =
 --============================================================================

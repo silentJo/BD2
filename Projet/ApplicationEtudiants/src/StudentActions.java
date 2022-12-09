@@ -47,7 +47,7 @@ public class StudentActions {
                     }
                 }
             } catch (SQLException e) {
-                System.out.println("Erreur avec les requêtes SQL !");
+                System.out.println("Erreur avec les requêtes SQL !" + e);
                 System.exit(1);
             }
         } catch (SQLException e) {
@@ -59,7 +59,7 @@ public class StudentActions {
 
     public void visualiserCours() {
         try {
-            visualiserCoursPreparedStatement = connection.prepareStatement("SELECT * FROM projet.visualiser_mes_cours()");
+            visualiserCoursPreparedStatement = connection.prepareStatement("SELECT * FROM projet.visualiser_mes_cours where \"etudiant\" = " + idEtudiant);
             try (ResultSet rs = visualiserCoursPreparedStatement.executeQuery()) {
                 System.out.printf("%-10s     | %-10s | %-20s | %-30s| \n", "", "Code", "Nom", "Projet");
                 while (rs.next()) {
@@ -70,7 +70,7 @@ public class StudentActions {
                             rs.getString(3));
                 }
             } catch (SQLException e) {
-                System.out.println("Impossible de visualiser les cours.");
+                System.out.println("Impossible de visualiser les cours." + e);
                 ApplicationEtudiants.getException(e);
             }
         } catch (SQLException e) {
