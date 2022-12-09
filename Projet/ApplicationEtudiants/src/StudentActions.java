@@ -1,4 +1,7 @@
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Scanner;
 
 public class StudentActions {
@@ -111,7 +114,7 @@ public class StudentActions {
 
                 System.out.println("\nIdentifiant du projet");
                 String identifiant = scanner.nextLine();
-                retirerDuGroupePreparedStatement.setString(3,identifiant);
+                retirerDuGroupePreparedStatement.setString(3, identifiant);
 
 
                 System.out.println("\nNuméro de groupe : ");
@@ -132,7 +135,7 @@ public class StudentActions {
     public void visualiserProjets() {
         try {
             visualiserProjetsPreparedStatement = connection.prepareStatement("SELECT * FROM projet.visualiser_mes_projets where \"Etudiant\" = " + idEtudiant);
-            try (ResultSet rs = visualiserProjetsPreparedStatement.executeQuery()){
+            try (ResultSet rs = visualiserProjetsPreparedStatement.executeQuery()) {
                 System.out.printf("%-10s     | %-20s | %-20s | %-20s | %-10s | \n",
                         "", "Identifiant", "Nom", "Code", "Num");
                 while (rs.next()) {
@@ -158,7 +161,7 @@ public class StudentActions {
         try {
             visualiserProjetsSansGroupesPreparedStatement = connection.prepareStatement("select * from projet.visualiser_mes_projets_sans_groupes where \"Etudiant\" = " + idEtudiant);
 
-            try (ResultSet rs = visualiserProjetsSansGroupesPreparedStatement.executeQuery()){
+            try (ResultSet rs = visualiserProjetsSansGroupesPreparedStatement.executeQuery()) {
                 System.out.printf("%-10s     | %-20s | %-20s | %-20s | %-10s | %-10s | \n",
                         "", "Identifiant", "Nom", "Cours", "Debut", "Fin");
                 while (rs.next()) {
@@ -183,7 +186,8 @@ public class StudentActions {
 
     public void visualiserGroupesIncomplets() {
         try {
-            visualiserGroupesIncompletsPreparedStatement = connection.prepareStatement("select * from projet.visualiser_groupes_incomplets(?) where \"Etudiant\" = " + idEtudiant);
+            visualiserGroupesIncompletsPreparedStatement = connection.prepareStatement("select * from projet.visualiser_groupes_incomplets("+idEtudiant+", (?)) " +
+                    "t(numero integer, nom varchar(20), prenom varchar(20), places integer, etudiant integer, identifiant varchar(20))");
 
             try {
                 System.out.println("\nIdentifiant");

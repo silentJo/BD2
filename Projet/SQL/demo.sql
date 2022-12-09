@@ -87,7 +87,8 @@ select * from projet.visualiser_mes_projets where "Etudiant" = 1;
 --h. Visualiser tous les projets pour lesquels il n’a pas encore de groupe
 select * from projet.visualiser_mes_projets_sans_groupes where "Etudiant" = 1;
 --i. Visualiser toutes les compositions de groupes incomplets du projet projSD
-select * from projet.visualiser_groupes_incomplets (VARCHAR(20) 'projSD') where "Etudiant" = 1;
+select * from projet.visualiser_groupes_incomplets(1, 'projSD')
+ t(numero integer, nom varchar(20), prenom varchar(20), places integer, etudiant integer, identifiant varchar(20));
 --3. Retour sur l’application centrale
 --a. __Valider le groupe 2 du projet projSD
 --call projet.valider_groupe('projSD', 2);

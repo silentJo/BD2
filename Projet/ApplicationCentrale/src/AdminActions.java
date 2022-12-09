@@ -226,7 +226,7 @@ public class AdminActions {
                 System.out.println();
 
             } catch (SQLException e) {
-                System.out.println("Impossible de visualiser les projets ..." +e);
+                System.out.println("Impossible de visualiser les projets ..." + e);
                 ApplicationCentrale.getException(e);
             }
         } catch (SQLException e) {

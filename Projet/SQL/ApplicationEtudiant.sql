@@ -224,8 +224,10 @@ group by p.identifiant, p.nom, c.code, p.date_debut, p.date_fin, ic.etudiant;
     4           ferneeuw    stéphanie   1
     7           null        null        2
  */
-CREATE OR REPLACE FUNCTION projet.visualiser_groupes_incomplets(nidentifiant VARCHAR(20)) RETURNS  VOID AS
+CREATE OR REPLACE FUNCTION projet.visualiser_groupes_incomplets(netudiant integer, nidentifiant VARCHAR(20)) RETURNS SETOF RECORD AS
 $$
+DECLARE
+    record record;
 BEGIN
     SELECT g.num                        AS "Numéro",
            e.nom                        AS "Nom",
@@ -240,8 +242,11 @@ BEGIN
     WHERE g.num = mg.groupe
       AND g.id_projet = mg.projet
       AND mg.etudiant = e.id
+      and e.id = netudiant
       AND p.identifiant = nidentifiant
       AND g.nb_membres < g.nb_places
-    group by g.num, e.nom, e.prenom, (g.nb_places - g.nb_membres), e.id, p.identifiant;
+    group by g.num, e.nom, e.prenom, (g.nb_places - g.nb_membres), e.id, p.identifiant
+    into record;
+    return next record;
 END;
 $$language plpgsql;
