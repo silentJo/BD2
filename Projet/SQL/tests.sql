@@ -48,7 +48,7 @@ select * from projet.inscription_groupe(3, 'projSQL', 2);
 --call projet.valider_groupe('projSQL', 1);
 
 -- se retirer du groupe
-call projet.retirer_du_groupe(1, 3, VARCHAR(20) 'projSD');
+call projet.retirer_du_groupe(1, 3, VARCHAR(20) 'projSQL');
 
 select * from projet.groupes;
 select * from projet.membres_groupe;
@@ -57,6 +57,6 @@ select * from projet.etudiants;
 select * from projet.inscriptions_cours;
 select * from projet.projets;
 
-select * from projet.visualiser_groupes_incomplets(4, 'projSQL')
+select * from projet.visualiser_groupes_incomplets(1, 'projSQL')
     t(numero integer, nom varchar(20), prenom varchar(20), places integer, etudiant integer, identifiant varchar(20));
 
