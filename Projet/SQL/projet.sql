@@ -236,7 +236,7 @@ BEGIN
 raise notice 'nb_membres_existants : %',nb_membres_existants;
     nb_membres_max := (SELECT COUNT(i.etudiant)
                        FROM projet.inscriptions_cours i
-                       WHERE cours =
+                       WHERE i.cours =
                              (SELECT p.cours
                               FROM projet.projets p
                               WHERE p.identifiant = nidentifiant_projet));
