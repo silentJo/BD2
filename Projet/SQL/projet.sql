@@ -236,7 +236,7 @@ BEGIN
 
     nb_membres_max := (SELECT COUNT(i.etudiant)
                        FROM projet.inscriptions_cours i
-                       WHERE cours =
+                       WHERE i.cours =
                              (SELECT p.cours
                               FROM projet.projets p
                               WHERE p.identifiant = nidentifiant_projet));
@@ -259,7 +259,7 @@ BEGIN
             LOOP
                 nb_groupes_actuel := nb_groupes_actuel + 1;
                 UPDATE projet.projets SET nb_groupes = nb_groupes_actuel WHERE id = id_projet_actuel;
-                INSERT INTO projet.groupes VALUES (nb_groupes_actuel, id_projet, nnb_places, DEFAULT, DEFAULT);
+                INSERT INTO projet.groupes VALUES (nb_groupes_actuel, id_projet_actuel, nnb_places, DEFAULT, DEFAULT);
             END LOOP;
     END IF;
 END;
