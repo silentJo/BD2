@@ -321,21 +321,20 @@ $$ LANGUAGE plpgsql;
 
 
 
-
 --============================================================================
 --=                            APPLICATION ETUDIANT                          =
 --============================================================================
 --=                              0) SE CONNECTER                             =
 --============================================================================
-create or replace function projet.seConnecter(nemail VARCHAR(50)) RETURNS RECORD AS
+CREATE OR REPLACE FUNCTION projet.seConnecter(nemail VARCHAR(50)) RETURNS RECORD AS
 $$
-    DECLARE
-        ETUDIANT record;
-    BEGIN
-        SELECT id, mdp FROM projet.etudiants WHERE email = nemail INTO etudiant;
-        RETURN etudiant;
-    END;
-$$ language plpgsql;
+DECLARE
+    ETUDIANT RECORD;
+BEGIN
+    SELECT id, mdp FROM projet.etudiants WHERE email = nemail INTO etudiant;
+    RETURN etudiant;
+END;
+$$ LANGUAGE plpgsql;
 
 --============================================================================
 --=                     1) VISUALISER MES COURS                              =
@@ -384,22 +383,36 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION projet.valider_inscription_groupe() RETURNS TRIGGER AS
 $$
 DECLARE
-    groupe_to_update projet.groupes%ROWTYPE;
+    code_cours        VARCHAR(8);
+    groupe_a_modifier projet.groupes%ROWTYPE;
 BEGIN
-    RAISE NOTICE 'increment membres groupe';
-    SELECT * FROM projet.groupes g WHERE g.num = new.groupe AND g.id_projet = new.projet INTO groupe_to_update;
-    IF NOT FOUND THEN
-        RAISE EXCEPTION 'Le groupe % du projet % ne se trouve pas dans la table', new.groupe, new.projet;
+    RAISE NOTICE 'Vérification des informations ...';
+    IF (NOT EXISTS(SELECT 1 FROM projet.groupes g WHERE g.num = new.groupe)) THEN
+        RAISE EXCEPTION 'Le groupe % n''existe pas', new.groupe;
+    ELSEIF (NOT EXISTS(SELECT 1 FROM projet.etudiants e WHERE e.id = new.etudiant)) THEN
+        RAISE EXCEPTION 'L''étudiant % n''existe pas', new.etudiant;
+    ELSEIF (NOT EXISTS(SELECT 1 FROM projet.projets p WHERE p.id = new.projet)) THEN
+        RAISE EXCEPTION 'Le projet % n''existe pas', new.projet;
     ELSE
-        IF groupe_to_update.nb_membres < groupe_to_update.nb_places THEN
-            UPDATE projet.groupes
-            SET nb_membres = nb_membres + 1
-            WHERE num = new.groupe
-              AND id_projet = new.projet;
-        ELSE
-            RAISE EXCEPTION 'Le groupe est complet';
+        SELECT * FROM projet.groupes g WHERE g.num = old.groupe AND g.id_projet = old.projet INTO groupe_a_modifier;
+        IF (groupe_a_modifier.nb_places = groupe_a_modifier.nb_membres) THEN
+            RAISE EXCEPTION 'Le groupe % est complet', new.groupe;
         END IF;
+
+        code_cours := (SELECT p.cours FROM projet.projets p WHERE p.id = old.projet);
+        IF (NOT EXISTS(SELECT 1
+                       FROM projet.inscriptions_cours ic
+                       WHERE ic.cours = code_cours
+                         AND ic.etudiant = new.etudiant)) THEN
+            RAISE EXCEPTION 'L''étudiant % n''est pas inscrit au cours % du projet %', new.etudiant, code_cours, new.projet;
+        END IF;
+
+        UPDATE projet.groupes
+        SET nb_membres = nb_membres + 1
+        WHERE num = new.groupe
+          AND id_projet = new.projet;
     END IF;
+
     RETURN new;
 END
 $$ LANGUAGE plpgsql;
@@ -409,32 +422,7 @@ CREATE OR REPLACE TRIGGER trigger_valider_inscription_groupe
     ON projet.membres_groupe
     FOR EACH ROW
 EXECUTE FUNCTION projet.valider_inscription_groupe();
-/*
-CREATE OR REPLACE FUNCTION projet.check_etudiant_inscrit_au_cours() RETURNS TRIGGER AS
-$$
-    DECLARE
-        cours integer := 0;
-    BEGIN
-        select c.code from projet.cours c, projet.inscriptions_cours ic where ic.etudiant = new.etudiant into cours;
-        if (new.etudiant
-                not in
-                    (select ic.etudiant
-                     from projet.inscriptions_cours ic
-                     where ic.cours = cours
-                       and ic.etudiant = new.etudiant))
-            then
-                raise exception 'Etudiant non inscrit à ce cours';
-        end if;
-        return new;
-    END;
-$$ language plpgsql;
 
-CREATE OR REPLACE TRIGGER trigger_check_etudiant_inscrit_au_cours
-    BEFORE INSERT
-    ON projet.membres_groupe
-    FOR EACH ROW
-EXECUTE FUNCTION projet.check_etudiant_inscrit_au_cours();
-*/
 --============================================================================
 --=                         3) SE RETIRER DU GROUPE                          =
 --============================================================================
@@ -457,35 +445,43 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION projet.decrementer_nb_membres() RETURNS TRIGGER AS
+CREATE OR REPLACE FUNCTION projet.valider_retirer_du_groupe() RETURNS TRIGGER AS
 $$
 DECLARE
-    groupe_to_update projet.groupes%ROWTYPE;
+    groupe_a_modifier projet.groupes%ROWTYPE;
 BEGIN
-    SELECT * FROM projet.groupes g WHERE g.num = OLD.groupe AND g.id_projet = OLD.projet INTO groupe_to_update;
-    IF NOT FOUND THEN
-        RAISE EXCEPTION 'Le groupe % du projet % ne se trouve pas dans la table', OLD.groupe, OLD.projet;
-    ELSEIF (SELECT g.est_valide FROM projet.groupes g WHERE g.num = old.groupe AND g.id_projet = old.projet) THEN
-        RAISE EXCEPTION 'groupe % déjà validé', OLD.groupe;
+    RAISE NOTICE 'Vérification des informations ...';
+    IF (NOT EXISTS(SELECT 1 FROM projet.groupes g WHERE g.num = old.groupe)) THEN
+        RAISE EXCEPTION 'Le groupe % n''existe pas', old.groupe;
+    ELSEIF (NOT EXISTS(SELECT 1 FROM projet.etudiants e WHERE e.id = old.etudiant)) THEN
+        RAISE EXCEPTION 'L''étudiant % n''existe pas', old.etudiant;
+    ELSEIF (NOT EXISTS(SELECT 1 FROM projet.projets p WHERE p.id = old.projet)) THEN
+        RAISE EXCEPTION 'Le projet % n''existe pas', old.projet;
+    ELSEIF (NOT EXISTS(SELECT 1
+                       FROM projet.membres_groupe mg
+                       WHERE mg.projet = old.projet AND mg.etudiant = old.etudiant)) THEN
+        RAISE EXCEPTION 'L''étudiant % n''est pas encore dans un groupe pour le projet %', old.etudiant, old.projet;
     ELSE
+        SELECT * FROM projet.groupes g WHERE g.num = old.groupe AND g.id_projet = old.projet INTO groupe_a_modifier;
+        IF (groupe_a_modifier.est_valide) THEN
+            RAISE EXCEPTION 'Le groupe % déjà validé - impossible de quitter', old.groupe;
+        END IF;
+
         UPDATE projet.groupes
         SET nb_membres = nb_membres - 1
         WHERE num = OLD.groupe
           AND id_projet = OLD.projet;
-
-        RAISE NOTICE 'Le nombre de membre du groupe % du projet % a été décrémenté', OLD.groupe, OLD.projet;
     END IF;
-    RETURN OLD;
-END;
+
+    RETURN new;
+END
 $$ LANGUAGE plpgsql;
 
-
-CREATE OR REPLACE TRIGGER trigger_decrementer_nb_membres
-    AFTER DELETE
+CREATE OR REPLACE TRIGGER trigger_valider_retirer_du_groupe
+    BEFORE DELETE
     ON projet.membres_groupe
     FOR EACH ROW
-EXECUTE FUNCTION projet.decrementer_nb_membres();
-
+EXECUTE FUNCTION projet.valider_retirer_du_groupe();
 
 --============================================================================
 --=                           4) VISUALISER MES PROJETS                      =
@@ -515,17 +511,17 @@ FROM projet.groupes g
     identifiant, son nom, l’identifiant du cours, sa date de début et sa date de fin.
  */
 CREATE OR REPLACE VIEW projet.visualiser_mes_projets_sans_groupes AS
-SELECT p.identifiant         AS "Identifiant",
-       p.nom        AS "Nom",
-       c.code      as "Cours",
-       p.date_debut AS "Début",
-       p.date_fin   AS "Fin",
-       ic.etudiant  AS "Etudiant"
+SELECT p.identifiant AS "Identifiant",
+       p.nom         AS "Nom",
+       c.code        AS "Cours",
+       p.date_debut  AS "Début",
+       p.date_fin    AS "Fin",
+       ic.etudiant   AS "Etudiant"
 FROM projet.projets p
          LEFT JOIN projet.cours c ON p.cours = c.code
          LEFT JOIN projet.inscriptions_cours ic ON c.code = ic.cours
 WHERE p.nb_groupes = 0
-group by p.identifiant, p.nom, c.code, p.date_debut, p.date_fin, ic.etudiant;
+GROUP BY p.identifiant, p.nom, c.code, p.date_debut, p.date_fin, ic.etudiant;
 
 
 --============================================================================
@@ -537,10 +533,10 @@ group by p.identifiant, p.nom, c.code, p.date_debut, p.date_fin, ic.etudiant;
     le nombre de places restantes dans le groupe. Les résultats seront triés par numéro de
     groupe.
  */
-CREATE OR REPLACE FUNCTION projet.visualiser_groupes_incomplets(netudiant integer, nidentifiant VARCHAR(20)) RETURNS SETOF RECORD AS
+CREATE OR REPLACE FUNCTION projet.visualiser_groupes_incomplets(netudiant INTEGER, nidentifiant VARCHAR(20)) RETURNS SETOF RECORD AS
 $$
 DECLARE
-    record record;
+    record RECORD;
 BEGIN
     SELECT g.num                        AS "Numéro",
            e.nom                        AS "Nom",
@@ -555,11 +551,11 @@ BEGIN
     WHERE g.num = mg.groupe
       AND g.id_projet = mg.projet
       AND mg.etudiant = e.id
-      and e.id = netudiant
+      AND e.id = netudiant
       AND p.identifiant = nidentifiant
       AND g.nb_membres < g.nb_places
-    group by g.num, e.nom, e.prenom, (g.nb_places - g.nb_membres), e.id, p.identifiant
-    into record;
-    return next record;
+    GROUP BY g.num, e.nom, e.prenom, (g.nb_places - g.nb_membres), e.id, p.identifiant
+    INTO record;
+    RETURN NEXT record;
 END;
-$$language plpgsql;
+$$ LANGUAGE plpgsql;
