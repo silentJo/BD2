@@ -232,8 +232,8 @@ BEGIN
         RAISE EXCEPTION 'Le projet % est introuvable', nidentifiant_projet;
     END IF;
 
-    nb_membres_existants := (SELECT SUM(g.nb_places) FROM projet.groupes g where g.id_projet = id_projet_actuel);
-
+    nb_membres_existants := (SELECT coalesce(SUM(g.nb_places),0) FROM projet.groupes g where g.id_projet = id_projet_actuel);
+raise notice 'nb_membres_existants : %',nb_membres_existants;
     nb_membres_max := (SELECT COUNT(i.etudiant)
                        FROM projet.inscriptions_cours i
                        WHERE cours =
@@ -259,7 +259,7 @@ BEGIN
             LOOP
                 nb_groupes_actuel := nb_groupes_actuel + 1;
                 UPDATE projet.projets SET nb_groupes = nb_groupes_actuel WHERE id = id_projet_actuel;
-                INSERT INTO projet.groupes VALUES (nb_groupes_actuel, id_projet, nnb_places, DEFAULT, DEFAULT);
+                INSERT INTO projet.groupes VALUES (nb_groupes_actuel, id_projet_actuel, nnb_places, DEFAULT, DEFAULT);
             END LOOP;
     END IF;
 END;
@@ -484,8 +484,12 @@ BEGIN
         RAISE EXCEPTION 'L''étudiant % n''existe pas', new.etudiant;
     ELSEIF (NOT EXISTS(SELECT 1 FROM projet.projets p WHERE p.id = new.projet)) THEN
         RAISE EXCEPTION 'Le projet % n''existe pas', new.projet;
+        /* si l'étudiant est deja dans un groupe du meme projet */
+    ELSEIF (EXISTS(SELECT 1 FROM projet.membres_groupe mg WHERE mg.etudiant = new.etudiant AND mg.projet = new.projet)) THEN
+        RAISE EXCEPTION 'L''étudiant % est déjà inscrit dans un autre groupe pour le projet %', new.etudiant, new.projet;
     ELSE
-        SELECT * FROM projet.groupes g WHERE g.num = old.groupe AND g.id_projet = old.projet INTO groupe_a_modifier;
+        SELECT * FROM projet.groupes g WHERE g.num = new.groupe AND g.id_projet = new.projet INTO groupe_a_modifier;
+        raise notice 'nb place % nb membres %', groupe_a_modifier.nb_places, groupe_a_modifier.nb_membres;
         IF (groupe_a_modifier.nb_places = groupe_a_modifier.nb_membres) THEN
             RAISE EXCEPTION 'Le groupe % est complet', new.groupe;
         END IF;
@@ -563,8 +567,7 @@ BEGIN
         WHERE num = OLD.groupe
           AND id_projet = OLD.projet;
     END IF;
-
-    RETURN new;
+    RETURN old;
 END
 $$ LANGUAGE plpgsql;
 
@@ -583,7 +586,7 @@ EXECUTE FUNCTION projet.valider_retirer_du_groupe();
     pas encore dans un groupe, ce dernier champ sera à null.
  */
 CREATE OR REPLACE VIEW projet.visualiser_mes_projets AS
-SELECT p.id        AS "Identifiant projet",
+SELECT p.identifiant        AS "Identifiant projet",
        p.nom       AS "Nom projet",
        c.code      AS "Code cours",
        g.num       AS "Num groupe", /*groupe DONT IL FAIT PARTIE ou <null>*/

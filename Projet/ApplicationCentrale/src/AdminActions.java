@@ -272,7 +272,7 @@ public class AdminActions {
             validerGroupePreparedStatement = connection.prepareStatement("CALL projet.valider_groupe(?, ?)");
             try {
 
-                System.out.println("\nIdentifiant cours : ");
+                System.out.println("\nIdentifiant projet : ");
                 String idProjet = scanner.nextLine();
 
                 System.out.println("\nNuméro de groupe : ");
