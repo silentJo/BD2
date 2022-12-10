@@ -281,7 +281,7 @@ public class AdminActions {
                 validerGroupePreparedStatement.setString(1, idProjet);
                 validerGroupePreparedStatement.setInt(2, Integer.parseInt(nbGroupe));
 
-                System.out.printf("%-10s %-20s", "Output", (validerGroupePreparedStatement.execute())
+                System.out.printf("%-10s %-20s", "Output", (validerGroupePreparedStatement.executeUpdate() == 0)
                         ? "Groupe validé"
                         : "Echec de la validation du groupe");
 
@@ -300,12 +300,12 @@ public class AdminActions {
             validerGroupesPreparedStatement = connection.prepareStatement("CALL projet.valider_groupes(?)");
             try {
 
-                System.out.println("\nIdentifiant cours : ");
+                System.out.println("\nIdentifiant projet : ");
                 String idProjet = scanner.nextLine();
 
                 validerGroupesPreparedStatement.setString(1, idProjet);
 
-                System.out.printf("%-10s %-20s", "Output", (validerGroupesPreparedStatement.execute())
+                System.out.printf("%-10s %-20s", "Output", (validerGroupesPreparedStatement.executeUpdate() == 0)
                         ? "Groupe validé"
                         : "Echec de la validation du groupe");
 

@@ -525,17 +525,16 @@ EXECUTE FUNCTION projet.valider_inscription_groupe();
     Se retirer d’un groupe en donnant l’identifiant de projet. Le retrait échouera si le groupe a été
     validé ou si l’étudiant n’est pas encore dans un groupe.
  */
-CREATE OR REPLACE PROCEDURE projet.retirer_du_groupe(nid_etudiant INTEGER, nnum_groupe INTEGER, nidentifiant VARCHAR(20)) AS
+CREATE OR REPLACE PROCEDURE projet.retirer_du_groupe(nid_etudiant INTEGER, nidentifiant VARCHAR(20)) AS
 $$
 DECLARE
     id_projet INTEGER := -1;
 BEGIN
     id_projet := (SELECT p.id FROM projet.projets p WHERE p.identifiant = nidentifiant);
     RAISE NOTICE 'nid_etudiant : %', nid_etudiant;-- = 1
-    RAISE NOTICE 'nnum_groupe : %', nnum_groupe;-- = 1
     RAISE NOTICE 'id projet : %', id_projet;-- = 3
-    DELETE FROM projet.membres_groupe WHERE etudiant = nid_etudiant AND groupe = nnum_groupe AND projet = id_projet;
-    RAISE NOTICE 'Le membre % du groupe % du projet % a été retiré', nid_etudiant, nnum_groupe, nidentifiant;
+    DELETE FROM projet.membres_groupe WHERE etudiant = nid_etudiant AND projet = id_projet;
+    RAISE NOTICE 'Le membre % du projet % a été retiré', nid_etudiant, nidentifiant;
 
 END;
 $$ LANGUAGE plpgsql;

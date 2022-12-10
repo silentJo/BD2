@@ -60,3 +60,4 @@ select * from projet.projets;
 select * from projet.visualiser_groupes_incomplets(1, 'projSQL')
     t(numero integer, nom varchar(20), prenom varchar(20), places integer, etudiant integer, identifiant varchar(20));
 
+delete from projet.membres_groupe where projet = 3 and etudiant = 1;

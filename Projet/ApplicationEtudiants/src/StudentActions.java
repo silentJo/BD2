@@ -107,23 +107,22 @@ public class StudentActions {
 
     public void retirerDuGroupe() {
         try {
-            retirerDuGroupePreparedStatement = connection.prepareCall("CALL projet.retirer_du_groupe(?, ?, ?)");
+            retirerDuGroupePreparedStatement = connection.prepareCall("CALL projet.retirer_du_groupe(?, ?)");
             try {
-                //nid_etudiant INTEGER, nnum_groupe INTEGER, nidentifiant VARCHAR(20)
                 retirerDuGroupePreparedStatement.setInt(1, idEtudiant);
 
                 System.out.println("\nIdentifiant du projet");
                 String identifiant = scanner.nextLine();
-                retirerDuGroupePreparedStatement.setString(3, identifiant);
+                retirerDuGroupePreparedStatement.setString(2, identifiant);
 
-
+/*
                 System.out.println("\nNuméro de groupe : ");
                 int numGroupe = Integer.parseInt(scanner.nextLine());
-                retirerDuGroupePreparedStatement.setInt(2, numGroupe);
+                retirerDuGroupePreparedStatement.setInt(2, numGroupe);*/
 
                 System.out.println(retirerDuGroupePreparedStatement.executeUpdate() == 0 ? "Retiré." : "Non retiré.");
             } catch (SQLException e) {
-                System.out.println("Impossible de se retirer du groupe.");
+                System.out.println("Impossible de se retirer du groupe." + e);
                 ApplicationEtudiants.getException(e);
             }
         } catch (SQLException e) {
@@ -162,10 +161,10 @@ public class StudentActions {
             visualiserProjetsSansGroupesPreparedStatement = connection.prepareStatement("select * from projet.visualiser_mes_projets_sans_groupes where \"Etudiant\" = " + idEtudiant);
 
             try (ResultSet rs = visualiserProjetsSansGroupesPreparedStatement.executeQuery()) {
-                System.out.printf("%-10s     | %-20s | %-20s | %-20s | %-10s | %-10s | \n",
+                System.out.printf("%-10s     | %-20s | %-10s | %-10s | %-20s | %-20s | \n",
                         "", "Identifiant", "Nom", "Cours", "Debut", "Fin");
                 while (rs.next()) {
-                    System.out.printf("\"%-10s     | %-20s | %-20s | %-20s | %-10s | %-10s | \n",
+                    System.out.printf("\"%-10s     | %-20s | %-10s | %-10s | %-20s | %-20s | \n",
                             "Projet",
                             rs.getString(1),
                             rs.getString(2),
@@ -192,6 +191,7 @@ public class StudentActions {
             try {
                 System.out.println("\nIdentifiant");
                 String identifiant = scanner.nextLine();
+
                 visualiserGroupesIncompletsPreparedStatement.setString(1, identifiant);
 
                 ResultSet rs = visualiserGroupesIncompletsPreparedStatement.executeQuery();

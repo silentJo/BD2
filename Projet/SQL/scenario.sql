@@ -74,7 +74,7 @@ select * from projet.visualiser_compo_projet where "Identifiant" = 'projSD';
 --a. __Se rajouter au groupe 1 du projet projSQL
 --
 --b. __Se rajouter au groupe 2 du projet projSD
-select * from projet.inscription_groupe(3, 'projSD', 2);
+--select * from projet.inscription_groupe(3, 'projSD', 2);
 --c. Se rajouter au groupe 1 du projet projSD
 select * from projet.inscription_groupe(3, 'projSD', 1);
 --7. Retour à l’application centrale
